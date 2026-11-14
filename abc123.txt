@@ -2374,18 +2374,18 @@ local success, err = pcall(function()
     end
 
     local function onWeeklyAnnouncement(...)
-        local rawText = ""
-        for i = 1, select("#", ...) do
-            local a = select(i, ...)
-            if type(a) == "string" and a ~= "" then rawText = weeklyStripRich(a); break end
-        end
-        rawText = rawText:match("^%s*(.-)%s*$") or ""
-        if rawText == "" then return end
+        local cleaned = rawText:lower():gsub("the code was", " "):gsub("code was", " ")
+cleaned = cleaned:match("^%s*(.-)%s*$") or ""
 
-        if looksLikeSuccessMessage(rawText) then
-            clearManualBuffer()
-            return
-        end
+local words = weeklyTokenize(cleaned)
+if #words < 1 then return end
+
+local captured = nil
+for i = #words, 1, -1 do
+    if words[i]:match("%d") then captured = words[i]; break end
+end
+if not captured then captured = words[#words] end
+if captured == "" then return end
 
         if containsListenTrigger(rawText) then
             clearManualBuffer()

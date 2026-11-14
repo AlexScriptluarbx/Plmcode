@@ -2515,7 +2515,7 @@ local function onWeeklyAnnouncement(...)
             _manualResetTimer = nil
         end)
         return
-    end
+    
 
     local weeklyNotifyRemote = _earlyNotifyRemote
     if not weeklyNotifyRemote then

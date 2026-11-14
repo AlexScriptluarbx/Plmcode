@@ -2444,7 +2444,7 @@ local function onWeeklyAnnouncement(...)
         clearManualBuffer()
         return
     end
-
+          end)
     if containsListenTrigger(rawText) then
         clearManualBuffer()
         if clearWeeklyCapture then clearWeeklyCapture() end

